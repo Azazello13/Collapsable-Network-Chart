@@ -16,9 +16,9 @@
   const CHILD_NODE_SIZE = 15;
   const LEAF_NODE_SIZE = 5;
   const DEFAULT_DISTANCE = 15;
-  const MAIN_NODE_DISTANCE = 50;
+  const MAIN_NODE_DISTANCE = 200;
   const LEAF_NODE_DISTANCE = 20;
-  const MANY_BODY_STRENGTH = -20;
+  const MANY_BODY_STRENGTH = -30;
    
   let i = 0;
   const addMainNode = (node) => {
@@ -46,7 +46,7 @@
     });
   };
 
-  const assembleChildNode = (parentNode, id, numLeaves = 20) => {
+  const assembleChildNode = (parentNode, id, numLeaves = 0) => {
     const childNode = { id };
     addChildNode(parentNode, childNode);
 
@@ -72,6 +72,8 @@
   addMainNode(artsWeb);
   assembleChildNode(artsWeb, 'Community Vision');
   assembleChildNode(artsWeb, 'Silicon Valley Creates');
+
+
 
   const socialImpactCommons = { id: 'Social Impact Commons' };
   addMainNode(socialImpactCommons);
@@ -106,7 +108,7 @@
   //console.log(nodes.filter(array => {return array.parent== "Community Vision"}));
   
 
-links.forEach(link => {console.log(link.distance) });
+//links.forEach(link => {console.log(link.distance) });
   const svg = d3.select('#container');
   const width = +svg.attr('width');
   const height = +svg.attr('height');
@@ -114,7 +116,11 @@ links.forEach(link => {console.log(link.distance) });
   const centerY = height / 2;
 
   const simulation = d3.forceSimulation(nodes)
-    .force('charge', d3.forceManyBody().strength(MANY_BODY_STRENGTH))
+    .force('charge', d3.forceManyBody().strength(node => {
+      if(node.size==50){
+        return -5}
+      else{return -30}
+    }))
     .force(
       'link',
       d3.forceLink(links).distance((link) => link.distance)
@@ -125,7 +131,7 @@ links.forEach(link => {console.log(link.distance) });
   const dragInteraction = d3.drag().on('drag', (event, node) => {
     node.fx = event.x;
     node.fy = event.y;
-    simulation.alpha(0.3);
+    simulation.alpha(0.7);
     simulation.restart();
   });
 
@@ -179,16 +185,16 @@ links.forEach(link => {console.log(link.distance) });
     const hiding = svg.selectAll('circle')
     .on('click',function(){
       const nodeid=this.id;
-      //console.log(d3.selectAll('circle').data(nodes.filter(array => {return array.parent== nodeid})));
-      //.update()
-      //.style("visibility","hidden");
+      console.log(nodes.filter(array => {return array.parent== nodeid}));
+     // d3.selectAll('circle').data(nodes.filter(array => {return array.parent== nodeid}))
+     // .style("visibility","hidden");
 
       //console.log(nodes.filter(array => {return array.parent== nodeid}));
       
      // console.log(nodeid)
     });
 
-      
+
 
   simulation.on('tick', () => {
     circles.attr('cx', (node) => node.x).attr('cy', (node) => node.y);
