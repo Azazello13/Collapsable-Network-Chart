@@ -166,7 +166,23 @@
      .on('mouseout', function (d, i) {
             d3.select(this).transition()
                  .duration('50')
-                 .attr('opacity', '1')});
+                 .attr('opacity', '1')})
+      .on('click',function(){
+                  const nodeid=this.id;
+                  console.log(nodes.filter(array => {return array.parent== nodeid}));
+                  const krugi=d3.selectAll('circle').filter(function() {
+
+                    return d3.select(this).attr("parent") == nodeid;
+                 });
+                 console.log(krugi);
+            
+                 krugi.remove();
+                 // .style("visibility","hidden");
+            
+                  //console.log(nodes.filter(array => {return array.parent== nodeid}));
+                  
+                 console.log(nodeid)
+                });
 
   
   
@@ -183,16 +199,7 @@
 
   
     const hiding = svg.selectAll('circle')
-    .on('click',function(){
-      const nodeid=this.id;
-      console.log(nodes.filter(array => {return array.parent== nodeid}));
-     // d3.selectAll('circle').data(nodes.filter(array => {return array.parent== nodeid}))
-     // .style("visibility","hidden");
-
-      //console.log(nodes.filter(array => {return array.parent== nodeid}));
-      
-     // console.log(nodeid)
-    });
+    
 
 
 
