@@ -36,12 +36,15 @@
     childNode.size = size;
     childNode.color = parentNode.color;
     childNode.parent=parentNode.id;
+    childNode.root=parentNode.parent,
     
     nodes.push(childNode);
     links.push({
+      root:parentNode.parent,
       source: parentNode,
       target: childNode,
       distance,
+      main:0,
       color: parentNode.color,
     });
   };
@@ -64,7 +67,9 @@
       source,
       target,
       distance: MAIN_NODE_DISTANCE,
-      color: source.color
+      color: source.color,
+      main:1
+
     });
   };
 
@@ -106,8 +111,8 @@
   connectMainNodes(ambitioUS, artsWeb);
 
   //console.log(nodes.filter(array => {return array.parent== "Community Vision"}));
-  
-
+  console.log(nodes);
+  console.log(links);
 //links.forEach(link => {console.log(link.distance) });
   const svg = d3.select('#container');
   const width = +svg.attr('width');
@@ -141,7 +146,10 @@
     .data(links)
     .enter()
     .append('line')
-    .attr('stroke', (link) => link.color || 'black');
+    .attr('sourceCircle',link => link.source.id)
+    .attr('root',(link) => link.root)
+    .attr('stroke', (link) => link.color || 'black')
+    .attr('main',(link) => link.main);
 
 
 
@@ -155,6 +163,7 @@
     .attr('fill', (node) => node.color || 'gray')
     .attr('r', (node) => node.size)
     .attr('parent', (node) => node.parent)
+    .attr('root', (node) => node.root)
     .attr('id', (node) => node.id)
     .call(dragInteraction)
     .on('mouseover', function (d, i) {
@@ -169,19 +178,41 @@
                  .attr('opacity', '1')})
       .on('click',function(){
                   const nodeid=this.id;
-                  console.log(nodes.filter(array => {return array.parent== nodeid}));
-                  const krugi=d3.selectAll('circle').filter(function() {
+                  //console.log(nodes.filter(array => {return array.parent=== nodeid}));
 
-                    return d3.select(this).attr("parent") == nodeid;
-                 });
-                 console.log(krugi);
-            
-                 krugi.remove();
-                 // .style("visibility","hidden");
-            
-                  //console.log(nodes.filter(array => {return array.parent== nodeid}));
+
+                  const linii=d3.selectAll('line').filter(function() { 
+                    
+                    const selection=d3.select(this);
+                    return (selection.attr("sourceCircle") == nodeid&&selection.attr("main") == "0")||selection.attr("root") == nodeid;});
+
+
+
+
+
+                  const krugi=d3.selectAll('circle').filter(function() { 
+                    
+                    const selection=d3.select(this);
+                    return selection.attr("parent") === nodeid||selection.attr("root") == nodeid;});
                   
-                 console.log(nodeid)
+                  
+                  const texty=d3.selectAll('text').filter(function() { return d3.select(this).attr("sourceCircle") === nodeid;});
+                
+ 
+
+                  const visibility = krugi.style("visibility")=="hidden" ? "visible" : "hidden";
+
+                  
+                  
+                  krugi.style("visibility", visibility);
+
+                  
+                  linii.style("visibility", visibility);
+
+                  texty.style("visibility", visibility);
+                 
+
+                  
                 });
 
   
@@ -192,6 +223,7 @@
     .data(nodes)
     .enter()
     .append('text')
+    .attr('sourceCircle', (node) => node.parent)
     .attr('text-anchor', 'middle')
     .attr('alignment-baseline', 'middle')
     .style('pointer-events', 'none')
